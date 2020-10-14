@@ -56,12 +56,12 @@ func (e *Engine) Stop() {
 }
 
 // Do - executes work
-func (e *Engine) Do(executable Executable) <-chan struct{} {
-	done := make(chan struct{}, 0)
+func (e *Engine) Do(executable Executable) <-chan bool {
+	done := make(chan bool, 0)
 
 	e.input <- work{
 		Executable: executable,
-		done:       done,
+		success:    done,
 	}
 
 	return done

@@ -8,7 +8,7 @@ import (
 
 type work struct {
 	Executable
-	done chan struct{}
+	success chan bool
 }
 
 // worker - a unit task executor
@@ -43,16 +43,27 @@ func (w *worker) Stop() {
 }
 
 func (w *worker) execute(work work) {
-	defer close(work.done)
 	if !work.IsCompleted() {
 		if err := work.Execute(); err != nil {
 			log(w.id).Errorf("error while executing: %+v", work)
 			work.OnFailure(err)
+
+			go func() {
+				work.success <- false
+				close(work.success)
+			}()
+
 			return
 		}
+
 		log(w.id).Infof("completed executing: %+v", work)
 		work.OnSuccess()
 	}
+
+	go func() {
+		work.success <- true
+		close(work.success)
+	}()
 }
 
 func (w *worker) work() {
