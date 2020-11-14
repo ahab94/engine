@@ -56,8 +56,8 @@ func (e *Engine) Stop() {
 }
 
 // Do - executes work
-func (e *Engine) Do(executable Executable) <-chan bool {
-	done := make(chan bool, 0)
+func (e *Engine) Do(executable Executable) chan bool {
+	done := make(chan bool)
 
 	e.input <- work{
 		Executable: executable,
@@ -65,6 +65,11 @@ func (e *Engine) Do(executable Executable) <-chan bool {
 	}
 
 	return done
+}
+
+// WorkerCount - returns worker count
+func (e *Engine) WorkerCount() int {
+	return len(e.workers)
 }
 
 func (e *Engine) dispatch() {
